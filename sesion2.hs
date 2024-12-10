@@ -74,3 +74,63 @@ prop_RevApp xs ys = rev (concat_Lista xs ys) == concat_Lista (rev ys) (rev xs)
 
 prop_RevRev :: Lista -> Bool
 prop_RevRev xs = rev (rev xs) == xs
+
+type Cola a = [a]
+
+empty :: Cola a
+empty = []
+
+isEmpty :: Cola a -> Bool
+isEmpty [] = True
+isEmpty _ = False
+
+add :: a -> Cola a -> Cola a
+add x xs = xs ++ [x]
+
+front :: Cola a -> a
+front [] = error "Cola vacia"
+front (x:xs) = x
+
+remove :: Cola a -> Cola a
+remove [] = error "Cola vacia"
+remove (_:xs) = xs
+
+type Cola2 a = ([a], [a])
+
+empty2 :: Cola2 a
+empty2 = ([], [])
+
+isEmpty2 :: Cola2 a -> Bool
+isEmpty2 ([], xs) = isEmpty xs
+isEmpty2 _ = False
+
+add2 :: a -> Cola2 a -> Cola2 a
+add2 y (xs, ys) = (xs, y: ys)
+
+front2 :: Cola2 a -> a
+front2 ([], []) = error "Cola vacia"
+front2 (x:xs, ys) = x
+
+remove2 :: Cola2 a -> Cola2 a
+remove2 ([], []) = error "Cola vacia"
+remove2 ([x], ys) = (reverse ys, [])
+remove2 (x:xs, ys) = (xs, ys)
+
+trans :: Cola2 a -> Cola a
+trans ([], []) = []
+trans (xs, ys) = xs ++ reverse ys
+
+igual :: Eq a => Cola2 a -> Cola a -> Bool
+igual xs ys = trans xs == ys
+
+prop_isEmpty :: Cola2 Int -> Bool
+prop_isEmpty xs = isEmpty2 xs == isEmpty (trans xs)
+
+prop_add :: Int -> Cola2 Int -> Bool
+prop_add x xs = igual (add2 x xs) (add x (trans xs))
+
+prop_front :: Cola2 Int -> Property
+prop_front (xs, ys) = not (isEmpty xs) ==> front2 (xs, ys) == front (trans (xs, ys))
+
+prop_remove :: Cola2 Int -> Property
+prop_remove (xs, ys) = not (isEmpty xs) ==> igual (remove2 (xs, ys)) (remove (trans (xs, ys)))
